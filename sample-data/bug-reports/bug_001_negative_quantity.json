@@ -1,0 +1,10 @@
+{
+  "bug_id": "BUG-ORD-042",
+  "title": "Negative Order Item Quantity Allowed Resulting in Negative Balances",
+  "affected_endpoint": "/orders",
+  "http_method": "POST",
+  "severity": "CRITICAL",
+  "symptom": "When an authenticated client submitted an order payload with item quantity <= 0 (e.g. quantity: -5), the service accepted the order, returned 201 Created, and calculated a negative total balance.",
+  "root_cause": "The OrderItem schema lacked a Pydantic ge=1 constraint and the service did not perform manual boundary verification before computing subtotals.",
+  "regression_test_requirement": "Every test suite targeting POST /orders must explicitly test quantity = -1, -5, and 0, verifying that the endpoint deterministically rejects the request with HTTP 422 Unprocessable Entity."
+}

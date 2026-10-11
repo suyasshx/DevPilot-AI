@@ -1,0 +1,10 @@
+{
+  "bug_id": "BUG-USR-019",
+  "title": "Unhandled Null Pointer Exception on Non-Existent User ID Lookup",
+  "affected_endpoint": "/users/{user_id}",
+  "http_method": "GET",
+  "severity": "HIGH",
+  "symptom": "Querying GET /users/99999 caused an unhandled ValueError/RuntimeError in the user service, crashing the server process with HTTP 500 Internal Server Error instead of returning 404.",
+  "root_cause": "The repository query failed to catch missing record exceptions before dereferencing user attributes.",
+  "regression_test_requirement": "Test suites targeting GET /users/{user_id} must query non-existent IDs and assert HTTP 404 Not Found with error detail message."
+}

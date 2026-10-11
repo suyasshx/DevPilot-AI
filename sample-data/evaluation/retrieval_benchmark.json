@@ -1,0 +1,32 @@
+[
+  {
+    "query": "negative item quantity in order submission",
+    "endpoint": "/orders",
+    "method": "POST",
+    "expected_target_ids": ["BUG-ORD-042", "boundary_testing_rules"]
+  },
+  {
+    "query": "missing bearer authentication token and expired jwt",
+    "endpoint": "/orders",
+    "method": "POST",
+    "expected_target_ids": ["auth_security_rules"]
+  },
+  {
+    "query": "negative pagination skip and excessive limit",
+    "endpoint": "/products",
+    "method": "GET",
+    "expected_target_ids": ["pagination_standards", "boundary_testing_rules"]
+  },
+  {
+    "query": "user not found 500 error instead of 404",
+    "endpoint": "/users/{user_id}",
+    "method": "GET",
+    "expected_target_ids": ["BUG-USR-019"]
+  },
+  {
+    "query": "product price string type schema regression",
+    "endpoint": "/products",
+    "method": "GET",
+    "expected_target_ids": ["BUG-PRD-088"]
+  }
+]

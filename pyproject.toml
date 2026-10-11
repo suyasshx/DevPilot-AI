@@ -1,0 +1,8 @@
+[tool.pytest.ini_options]
+testpaths = ["backend/tests", "sample-api/tests"]
+addopts = "--import-mode=importlib"
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::DeprecationWarning:starlette.*",
+]

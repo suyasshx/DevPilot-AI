@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevPilot AI Test Execution Report — {{ run.run_uuid }}</title>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border-color: #30363d;
+      --text-primary: #f0f6fc;
+      --text-secondary: #8b949e;
+      --text-muted: #6e7681;
+      --accent-blue: #58a6ff;
+      --accent-green: #238636;
+      --accent-green-bright: #3fb950;
+      --accent-red: #da3633;
+      --accent-red-bright: #f85149;
+      --accent-amber: #d29922;
+      --accent-purple: #a371f7;
+      --accent-cyan: #39c5cf;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-badge {
+      background: linear-gradient(135deg, #238636 0%, #1f6feb 100%);
+      color: #fff;
+      font-weight: 800;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+    .logo-title h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .logo-title p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    .run-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .run-badge.passed {
+      background: rgba(35, 134, 54, 0.2);
+      border: 1px solid var(--accent-green-bright);
+      color: var(--accent-green-bright);
+    }
+    .run-badge.failed {
+      background: rgba(218, 54, 51, 0.2);
+      border: 1px solid var(--accent-red-bright);
+      color: var(--accent-red-bright);
+    }
+
+    .metadata-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+    .meta-item {
+      font-size: 0.85rem;
+    }
+    .meta-label {
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+    .meta-value {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-blue);
+    }
+    .kpi-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .kpi-value {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .kpi-value.green { color: var(--accent-green-bright); }
+    .kpi-value.red { color: var(--accent-red-bright); }
+    .kpi-value.blue { color: var(--accent-blue); }
+    .kpi-value.amber { color: var(--accent-amber); }
+    .kpi-subtext {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* 5-Way Taxonomy Breakdown Section */
+    .section-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .taxonomy-bar {
+      display: flex;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      background: var(--bg-tertiary);
+    }
+    .tax-segment {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .tax-none { background-color: var(--accent-green-bright); }
+    .tax-contract_violation { background-color: var(--accent-red-bright); }
+    .tax-execution_error { background-color: var(--accent-amber); }
+    .tax-invalid_test { background-color: var(--accent-purple); }
+    .tax-generation_error { background-color: #f0883e; }
+    .tax-infrastructure_failure { background-color: var(--text-muted); }
+
+    .taxonomy-legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-tertiary);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-info {
+      flex: 1;
+    }
+    .legend-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .legend-count {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    /* Filters & Controls */
+    .controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .filter-pill:hover, .filter-pill.active {
+      background: var(--accent-blue);
+      color: #fff;
+      border-color: var(--accent-blue);
+    }
+    .search-box {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-primary);
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      width: 280px;
+    }
+    .search-box:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+    }
+
+    /* Test Results Table */
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+    .results-table th {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      padding: 12px 16px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .results-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+    .results-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+    .badge-status-passed { background: rgba(35, 134, 54, 0.2); color: var(--accent-green-bright); border: 1px solid var(--accent-green); }
+    .badge-status-failed { background: rgba(218, 54, 51, 0.2); color: var(--accent-red-bright); border: 1px solid var(--accent-red); }
+    .badge-status-error { background: rgba(210, 153, 34, 0.2); color: var(--accent-amber); border: 1px solid var(--accent-amber); }
+
+    .badge-method-get { background: rgba(56, 139, 253, 0.2); color: var(--accent-blue); }
+    .badge-method-post { background: rgba(35, 134, 54, 0.2); color: var(--accent-green-bright); }
+    .badge-method-put { background: rgba(210, 153, 34, 0.2); color: var(--accent-amber); }
+    .badge-method-delete { background: rgba(218, 54, 51, 0.2); color: var(--accent-red-bright); }
+
+    .badge-tax {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: none;
+    }
+    .badge-tax.tax-none { background: rgba(35, 134, 54, 0.15); color: var(--accent-green-bright); }
+    .badge-tax.tax-contract_violation { background: rgba(218, 54, 51, 0.2); color: var(--accent-red-bright); }
+    .badge-tax.tax-execution_error { background: rgba(210, 153, 34, 0.2); color: var(--accent-amber); }
+    .badge-tax.tax-invalid_test { background: rgba(163, 113, 247, 0.2); color: var(--accent-purple); }
+    .badge-tax.tax-generation_error { background: rgba(240, 136, 62, 0.2); color: #f0883e; }
+    .badge-tax.tax-infrastructure_failure { background: rgba(110, 118, 129, 0.2); color: var(--text-muted); }
+
+    /* Expandable Row / Details */
+    .btn-inspect {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--accent-blue);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-inspect:hover {
+      background: var(--accent-blue);
+      color: #fff;
+    }
+    .detail-row {
+      display: none;
+      background: #090d13;
+    }
+    .detail-row.open {
+      display: table-row;
+    }
+    .detail-content {
+      padding: 20px;
+      border-bottom: 2px solid var(--border-color);
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .code-box {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      max-height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: var(--text-primary);
+    }
+    .evidence-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 8px;
+    }
+    .evidence-item {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Terminal Transcript */
+    .terminal-card {
+      background: #05070a;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .terminal-header {
+      background: var(--bg-tertiary);
+      padding: 10px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .terminal-body {
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      max-height: 300px;
+      overflow-y: auto;
+      line-height: 1.6;
+      color: #c9d1d9;
+    }
+    .log-line {
+      margin-bottom: 2px;
+    }
+    .log-line.info { color: #58a6ff; }
+    .log-line.warn { color: #d29922; }
+    .log-line.error { color: #f85149; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 24px 0;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-color);
+    }
+
+    @media (max-width: 768px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .search-box { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header Card -->
+    <div class="header-card">
+      <div class="header-top">
+        <div class="logo-area">
+          <div class="logo-badge">DevPilot AI</div>
+          <div class="logo-title">
+            <h1>Autonomous QA Execution Report</h1>
+            <p>Contract-Grounded Test Automation & 5-Way Failure Taxonomy</p>
+          </div>
+        </div>
+        <div>
+          {% if run.failed_tests == 0 and run.error_tests == 0 %}
+          <div class="run-badge passed">✓ ALL TESTS PASSED</div>
+          {% else %}
+          <div class="run-badge failed">✕ FAILURES DETECTED</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="metadata-grid">
+        <div class="meta-item">
+          <div class="meta-label">Project</div>
+          <div class="meta-value">{{ project.name }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Run UUID</div>
+          <div class="meta-value">{{ run.run_uuid }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Target Base URL</div>
+          <div class="meta-value">{{ run.target_base_url }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Execution Duration</div>
+          <div class="meta-value">{{ duration_str }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Started At</div>
+          <div class="meta-value">{{ started_at_str }}</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Report Generated</div>
+          <div class="meta-value">{{ generated_at_str }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive KPI Metrics -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Pass Rate</div>
+        <div class="kpi-value {% if run_pass_rate >= 80.0 %}green{% elif run_pass_rate >= 50.0 %}amber{% else %}red{% endif %}">
+          {{ run_pass_rate }}%
+        </div>
+        <div class="kpi-subtext">{{ run.passed_tests }} / {{ run.total_tests }} Passed</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Total Test Cases</div>
+        <div class="kpi-value blue">{{ run.total_tests }}</div>
+        <div class="kpi-subtext">{{ run.failed_tests }} Failed, {{ run.error_tests }} Errors</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Avg / P95 Latency</div>
+        <div class="kpi-value blue">{{ avg_latency_ms }}<span style="font-size: 1rem; color: var(--text-muted);"> ms</span></div>
+        <div class="kpi-subtext">P95: {{ p95_latency_ms }} ms</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Contract Compliance</div>
+        <div class="kpi-value green">{{ contract_compliance_rate }}%</div>
+        <div class="kpi-subtext">OpenAPI Grounding Score</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">Structural Validity</div>
+        <div class="kpi-value green">{{ structural_validity_rate }}%</div>
+        <div class="kpi-subtext">Deterministic Pydantic Check</div>
+      </div>
+    </div>
+
+    <!-- 5-Way Failure Taxonomy Breakdown -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>5-Way Failure Taxonomy Breakdown</span>
+      </div>
+
+      <!-- Segmented Bar -->
+      <div class="taxonomy-bar">
+        {% if taxonomy_counts.none > 0 %}
+        <div class="tax-segment tax-none" style="width: {{ tax_pcts.none }}%;" title="None (Passed): {{ taxonomy_counts.none }}"></div>
+        {% endif %}
+        {% if taxonomy_counts.contract_violation > 0 %}
+        <div class="tax-segment tax-contract_violation" style="width: {{ tax_pcts.contract_violation }}%;" title="Contract Violation: {{ taxonomy_counts.contract_violation }}"></div>
+        {% endif %}
+        {% if taxonomy_counts.execution_error > 0 %}
+        <div class="tax-segment tax-execution_error" style="width: {{ tax_pcts.execution_error }}%;" title="Execution Error: {{ taxonomy_counts.execution_error }}"></div>
+        {% endif %}
+        {% if taxonomy_counts.invalid_test > 0 %}
+        <div class="tax-segment tax-invalid_test" style="width: {{ tax_pcts.invalid_test }}%;" title="Invalid Test: {{ taxonomy_counts.invalid_test }}"></div>
+        {% endif %}
+        {% if taxonomy_counts.generation_error > 0 %}
+        <div class="tax-segment tax-generation_error" style="width: {{ tax_pcts.generation_error }}%;" title="Generation Error: {{ taxonomy_counts.generation_error }}"></div>
+        {% endif %}
+        {% if taxonomy_counts.infrastructure_failure > 0 %}
+        <div class="tax-segment tax-infrastructure_failure" style="width: {{ tax_pcts.infrastructure_failure }}%;" title="Infrastructure Failure: {{ taxonomy_counts.infrastructure_failure }}"></div>
+        {% endif %}
+      </div>
+
+      <!-- Legend -->
+      <div class="taxonomy-legend">
+        <div class="legend-item">
+          <div class="legend-dot tax-none"></div>
+          <div class="legend-info">
+            <div class="legend-name">None (Passed)</div>
+            <div class="legend-count">{{ taxonomy_counts.none }} tests ({{ tax_pcts.none }}%)</div>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-dot tax-contract_violation"></div>
+          <div class="legend-info">
+            <div class="legend-name">Contract Violation</div>
+            <div class="legend-count">{{ taxonomy_counts.contract_violation }} tests ({{ tax_pcts.contract_violation }}%)</div>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-dot tax-execution_error"></div>
+          <div class="legend-info">
+            <div class="legend-name">Execution Error</div>
+            <div class="legend-count">{{ taxonomy_counts.execution_error }} tests ({{ tax_pcts.execution_error }}%)</div>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-dot tax-invalid_test"></div>
+          <div class="legend-info">
+            <div class="legend-name">Invalid Test</div>
+            <div class="legend-count">{{ taxonomy_counts.invalid_test }} tests ({{ tax_pcts.invalid_test }}%)</div>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-dot tax-generation_error"></div>
+          <div class="legend-info">
+            <div class="legend-name">Generation Error</div>
+            <div class="legend-count">{{ taxonomy_counts.generation_error }} tests ({{ tax_pcts.generation_error }}%)</div>
+          </div>
+        </div>
+
+        <div class="legend-item">
+          <div class="legend-dot tax-infrastructure_failure"></div>
+          <div class="legend-info">
+            <div class="legend-name">Infrastructure Failure</div>
+            <div class="legend-count">{{ taxonomy_counts.infrastructure_failure }} tests ({{ tax_pcts.infrastructure_failure }}%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Granular Test Results Explorer -->
+    <div class="section-card">
+      <div class="controls-bar">
+        <div class="filter-pills">
+          <button class="filter-pill active" onclick="filterStatus('all')">All ({{ results|length }})</button>
+          <button class="filter-pill" onclick="filterStatus('passed')">Passed ({{ run.passed_tests }})</button>
+          <button class="filter-pill" onclick="filterStatus('failed')">Failed ({{ run.failed_tests }})</button>
+          <button class="filter-pill" onclick="filterStatus('error')">Errors ({{ run.error_tests }})</button>
+        </div>
+        <input type="text" id="searchInput" class="search-box" placeholder="Search tests by ID, name, path..." onkeyup="filterSearch()">
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="results-table" id="resultsTable">
+          <thead>
+            <tr>
+              <th>Test ID</th>
+              <th>Method</th>
+              <th>Endpoint Path</th>
+              <th>Category</th>
+              <th>Expected</th>
+              <th>Actual</th>
+              <th>Latency</th>
+              <th>Taxonomy</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in results %}
+            <tr class="test-row" data-status="{{ r.status }}" data-taxonomy="{{ r.failure_category }}">
+              <td style="font-family: var(--font-mono); font-weight: 700;">{{ r.test_id_code }}</td>
+              <td><span class="badge badge-method-{{ r.http_method|lower }}">{{ r.http_method }}</span></td>
+              <td style="font-family: var(--font-mono);">{{ r.endpoint_path }}</td>
+              <td><span style="color: var(--text-secondary); text-transform: capitalize;">{{ r.category }}</span></td>
+              <td style="font-family: var(--font-mono);">{{ r.expected_status }}</td>
+              <td style="font-family: var(--font-mono);">{{ r.response_status_code if r.response_status_code else 'N/A' }}</td>
+              <td style="font-family: var(--font-mono);">{{ "%.1f"|format(r.response_time_ms) }} ms</td>
+              <td><span class="badge-tax tax-{{ r.failure_category }}">{{ r.failure_category }}</span></td>
+              <td><span class="badge badge-status-{{ r.status }}">{{ r.status }}</span></td>
+              <td>
+                <button class="btn-inspect" onclick="toggleDetails('detail-{{ r.id }}')">Inspect</button>
+              </td>
+            </tr>
+            <tr id="detail-{{ r.id }}" class="detail-row">
+              <td colspan="10">
+                <div class="detail-content">
+                  <div style="margin-bottom: 12px; font-weight: 700; font-size: 0.95rem;">
+                    {{ r.test_name }}
+                    {% if r.error_message %}
+                    <span style="color: var(--accent-red-bright); margin-left: 12px;">Error: {{ r.error_message }}</span>
+                    {% endif %}
+                  </div>
+
+                  <div class="detail-grid">
+                    <div>
+                      <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Request Sent</div>
+                      <div class="code-box">{{ r.request_json }}</div>
+                    </div>
+                    <div>
+                      <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Response Received</div>
+                      <div class="code-box">{{ r.response_json }}</div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">Evidentiary Assertion Checks</div>
+                    <ul class="evidence-list">
+                      {% for ev in r.assertion_evidence %}
+                      <li class="evidence-item">{{ ev }}</li>
+                      {% else %}
+                      <li class="evidence-item" style="color: var(--text-muted);">No assertions recorded.</li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Execution Logs Terminal Transcript -->
+    <div class="terminal-card">
+      <div class="terminal-header">
+        <span>Execution Audit Log Transcript</span>
+        <span>{{ logs|length }} entries</span>
+      </div>
+      <div class="terminal-body" id="logTerminal">
+        {% for log in logs %}
+        <div class="log-line">
+          <span style="color: var(--text-muted);">[{{ log.timestamp_str }}]</span>
+          <span style="color: var(--accent-blue);">[{{ log.log_level }}]</span>
+          <span>{{ log.message }}</span>
+        </div>
+        {% else %}
+        <div class="log-line" style="color: var(--text-muted);">No execution logs recorded.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      Generated automatically by <strong>DevPilot AI</strong> &mdash; EA Autonomous QA Platform &bull; Offline Reproducible Report
+    </div>
+  </div>
+
+  <script>
+    function toggleDetails(rowId) {
+      const row = document.getElementById(rowId);
+      if (row) {
+        row.classList.toggle('open');
+      }
+    }
+
+    function filterStatus(status) {
+      document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const rows = document.querySelectorAll('.test-row');
+      rows.forEach(r => {
+        const rowStatus = r.getAttribute('data-status');
+        if (status === 'all' || rowStatus === status) {
+          r.style.display = '';
+        } else {
+          r.style.display = 'none';
+        }
+      });
+      // Close open detail rows
+      document.querySelectorAll('.detail-row').forEach(dr => dr.classList.remove('open'));
+    }
+
+    function filterSearch() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('.test-row');
+      rows.forEach(r => {
+        const text = r.innerText.toLowerCase();
+        if (text.includes(query)) {
+          r.style.display = '';
+        } else {
+          r.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

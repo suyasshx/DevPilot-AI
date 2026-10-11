@@ -1,0 +1,84 @@
+# ==========================================
+# DevPilot AI - Git Ignore Policy
+# ==========================================
+
+# --- Environment & Secret Credentials ---
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.p12
+*.pfx
+*.cert
+*.crt
+
+# --- Python Artifacts & Virtual Envs ---
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Python Testing & Coverage ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+
+# --- Node.js & Frontend Artifacts ---
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Local Databases & Persistent Storage ---
+*.db
+*.sqlite
+*.sqlite3
+devpilot.db
+data/
+
+# --- Logs & Runtime State ---
+*.log
+logs/
+
+# --- Operating System & IDE Artifacts ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

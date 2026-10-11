@@ -1,0 +1,10 @@
+{
+  "bug_id": "BUG-PRD-088",
+  "title": "Product Catalog Schema Violation Returning String Instead of Float for Price",
+  "affected_endpoint": "/products",
+  "http_method": "GET",
+  "severity": "MEDIUM",
+  "symptom": "Following a microservice refactoring, GET /products returned items where the price field was serialized as a string (e.g. '69.99') instead of a float (69.99), breaking mobile client deserialization.",
+  "root_cause": "Database query serializer cast decimal column to string without converting to float in the presentation layer.",
+  "regression_test_requirement": "Every test suite validating GET /products must validate each product item against the OpenAPI JSON Schema, specifically verifying that typeof(price) is numeric (float or int) and >= 0."
+}
